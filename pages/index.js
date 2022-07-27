@@ -2,7 +2,7 @@ import { Component } from "react";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { useState } from "react";
-const host = process.env.VERCEL_URL === undefined ? "localhost:3000" : process.env.VERCEL_URL;
+const host = process.env.VERCEL_URL ? "localhost:3000" : process.env.VERCEL_URL;
 const redirect_uri = `https://discord.com/api/oauth2/authorize?client_id=729335748670783488&redirect_uri=http://${host}/&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none`
 
 
