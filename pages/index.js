@@ -17,7 +17,7 @@ function Emoji(props) {
         Requires colons: {data.require_colons ? 'Yes' : 'No'}<br/>
         Managed by integration: {data.managed ? 'Yes' : 'No'}<br/>
         Animated: {data.animated ? 'Yes' : 'No'}<br/>
-        URL: <a href={url} target="_blank">{url}</a>
+        URL: <a href={url} target="_blank" rel="noreferrer">{url}</a>
       </div>
       <div>
         <Image src={url+"?size=128"} alt="icon" width={128} height={128}/>
@@ -31,7 +31,7 @@ function Role(props) {
   const colour = `#${data.color.toString(16).padStart(6, '0')}`;
   let image = null;
   if (data.icon) {
-    image = <Image src={`https://cdn.discordapp.com/role-icons/${data.id}/${data.icon}.png`} height={32} width={32}/>
+    image = <Image src={`https://cdn.discordapp.com/role-icons/${data.id}/${data.icon}.png`} alt="icon" height={32} width={32}/>
   }
   return (
       <div className={styles.card}>
@@ -60,7 +60,7 @@ function Guild(props) {
   const url = data.icon === null ? `https://cdn.discordapp.com/embed/avatars/${data.id % 5}.png` : `https://cdn.discordapp.com/icons/${data.id}/${data.icon}.webp`;
   if(hidden) {
     return (
-      <div className={styles.guildCard} key={props.index} onClick={() => {setHidden(!hidden)}}>
+      <div className={styles.guildCard} onClick={() => {setHidden(!hidden)}}>
         <div>
           <h3>{data.name} ({data.id})</h3>
         </div>
@@ -71,7 +71,7 @@ function Guild(props) {
     )
   }
   return (
-    <div className={styles.guildCard} key={props.index} onClick={() => {setHidden(!hidden)}}>
+    <div className={styles.guildCard} onClick={() => {setHidden(!hidden)}}>
       <div>
         <h3>{data.name} ({data.id})</h3>
         <ul>
@@ -310,7 +310,7 @@ export default class Index extends Component {
           <h1>Welcome {this.state.user.username || 'deleted-user'}#{this.state.user.discriminator || '0000'}!</h1>
           <div>Your IP is {this.state.ip}</div>
           <User data={this.state.user}/>
-          {this.state.guilds.map((data, index) => <Guild data={data} index={index}/>)}
+          {this.state.guilds.map((data, index) => <Guild data={data} key={index}/>)}
         </main>
       )
     }
