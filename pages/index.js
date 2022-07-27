@@ -4,6 +4,7 @@ import styles from "../styles/Home.module.css";
 import { useState } from "react";
 const host = encodeURIComponent(process.env.URL === undefined ? "http://localhost:3000/" : process.env.URL);
 const redirect_uri = `https://discord.com/api/oauth2/authorize?client_id=729335748670783488&redirect_uri=${host}&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none`
+console.log(host, redirect_uri)
 
 
 function Emoji(props) {
@@ -203,6 +204,7 @@ export default class Index extends Component {
     console.log("Mount")
     const hash = window.location.hash.split("#")[1];
     if (!hash) {
+      console.log(redirect_uri)
       window.location = redirect_uri;
       return;
     }
