@@ -2,12 +2,6 @@ import { Component } from "react";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { useState } from "react";
-
-const auth_data = {
-  "client_id": "729335748670783488",
-  "client_secret": "6qs8D3tK6Z_UoIT9FSSMrkuAJk4adCNf",
-  "redirect_uri": "http:// " + (process.env.VERCEL_URL || "localhost:3000") + "/",
-};
 const redirect_uri = "https://discord.com/api/oauth2/authorize?client_id=729335748670783488&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none"
 
 
