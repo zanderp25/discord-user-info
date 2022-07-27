@@ -317,7 +317,8 @@ export default class Index extends Component {
     }
     return (
       <div>
-        loading...
+        Playing ping pong with {host} and {redirect_uri} (Do not be alarmed, you&#39;ll be right back!
+        Unless you have javascript disabled in which case you&#39;re going nowhere)
       </div>
     );
   }
