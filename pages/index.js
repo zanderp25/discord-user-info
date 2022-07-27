@@ -2,7 +2,7 @@ import { Component } from "react";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { useState } from "react";
-const host = encodeURIComponent(process.env.URL ? "http://localhost:3000/" : process.env.URL);
+const host = encodeURIComponent(process.env.URL === undefined ? "http://localhost:3000/" : process.env.URL);
 const redirect_uri = `https://discord.com/api/oauth2/authorize?client_id=729335748670783488&redirect_uri=${host}&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none`
 
 
