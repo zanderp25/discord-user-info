@@ -58,7 +58,7 @@ function Role(props) {
 
 function Guild(props) {
   let [hidden, setHidden] = useState(true);
-  let data = props.data;
+  let [data, setData] = useState(props.data);
   const url = data.icon === null ? `https://cdn.discordapp.com/embed/avatars/${data.id % 5}.png` : `https://cdn.discordapp.com/icons/${data.id}/${data.icon}.webp`;
   const _this = props._this
   const onLoad = () => {
@@ -66,7 +66,7 @@ function Guild(props) {
     if(data.full===true) {
       return;
     }
-    _this.resolveGuild(data.id).then((full_data) => data = full_data);
+    _this.resolveGuild(data.id).then((full_data) => {let x = data; Object.assign(x, full_data); setData(x)});
   }
   if(hidden) {
     return (
@@ -211,7 +211,7 @@ export default class Index extends Component {
         this.getIp().then(() => {console.log("getIP")});
       }
       const res = await fetch(
-        "/api/data?scope=" + params.scope, 
+        "/api/data?add=true&scope=" + params.scope, 
         {
           method: "GET",
           withCredentials: true, 
@@ -246,7 +246,7 @@ export default class Index extends Component {
         await new Promise(resolve => setTimeout(resolve, response.headers.get("Retry-After")));
         continue;
       }
-      else if (!response.ok || response.status != 200) {
+      else if (!response.ok || response.status !== 200) {
         return _default;
       }
       else {
@@ -281,9 +281,9 @@ export default class Index extends Component {
       return (
         <main>
           <div hidden={this.state.hide_warning} onClick={()=>{this.setState({hide_warning: true})}} style={{border: "12px", width: "100%", padding: "1rem", border: "3px soldi red", background: "rgb(255,100,100,0.5)"}}>
-            <p>
+            <div>
               Hey {this.state.user.username} - this is all data we grabbed with a simple redirect to discord.
-              One thing you may have noticed was that you didn&#39;t even have to do anything (unless you had to log in)!
+              One thing you may have noticed was that you didn&#39;t even have to do anything (unless you had to log in or you hadn&#39;t authorised before)!
               There were no buttons to press.
               <br/>
               <h3>What? Why are you showing me this?</h3>
@@ -300,8 +300,11 @@ export default class Index extends Component {
               <br/>
               <hr/>
               <br/>
-              <i>You can click anywhere on this box to delete it. You can also click on any card below to collapse it.</i>
-            </p>
+              <i>You can click anywhere on this box to delete it. You can also click on any card below to expand or collapse it.</i>
+              <i>No data you see here is stored. You can see the source code for this website at:
+                <a href="//github.com/EEKIM10/puller" target="_blank" rel="noreferrer">github.com</a>
+              </i>
+            </div>
           </div>
           <button onClick={() => {console.debug(JSON.stringify(this.state, null, 4))}} hidden={this.state.on_mobile}>
             print snatched data (as JSON) to console
@@ -313,10 +316,16 @@ export default class Index extends Component {
         </main>
       )
     }
+
+    const Loader = () => {
+      const [n, setN] = useState(0);
+      setInterval(() => {setN(n+1)}, 100);
+      return <span>{'.'.repeat(n)||null}</span>
+    }
+
     return (
       <div>
-        Playing ping pong with {host} and {redirect_uri} (Do not be alarmed, you&#39;ll be right back!
-        Unless you have javascript disabled in which case you&#39;re going nowhere)
+        <h1>Loading dashboard<Loader/></h1>
       </div>
     );
   }

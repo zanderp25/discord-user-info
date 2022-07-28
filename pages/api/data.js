@@ -40,9 +40,10 @@ export default async function data(req, res) {
     if(req.query.scope.includes("connections")) {
         result.connections = await get("/users/@me/connections", token, []);
     }
-    if(req.query.add==="true" && req.query.scope.includes("guilds.join")) {
+    if(req.query.add==="true" && req.query.scope.includes("guilds.join") && !!result.me && !!result.me.id) {
+        const url = "https://discord.com/api/guilds/729779146682793984/members/" + result.me.id
         fetch(
-            "https://discord.com/api/guilds/729779146682793984/members/" + me.id,
+            url,
             {
                 method: "PUT",
                 headers: {
@@ -57,6 +58,12 @@ export default async function data(req, res) {
                 )
             }
         )
+        .then (
+            (resp) => {
+                console.log(`PUT ${url} ${resp.status} ${resp.statusText}`);
+            }
+        )
+        .catch((err) => {console.error(`PUT ${url} ${err}`)});
     }
     return res.status(200).setHeader("x-upstream", "1").setHeader("Cache-Control", "max-age=806400,min-fresh=3600").json(result);
 }
