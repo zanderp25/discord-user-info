@@ -1,4 +1,4 @@
-async function get(endpoint, token) {
+async function get(endpoint, token, _default=null) {
     while(1) {
         let response = await fetch(
             "https://discord.com/api" + endpoint,
@@ -13,7 +13,7 @@ async function get(endpoint, token) {
             continue;
         }
         else if (!response.ok || response.status != 200) {
-            return null;
+            return _default;
         }
         else {
             let data = await response.json();
@@ -30,12 +30,33 @@ export default async function data(req, res) {
     }
     const token = req.headers.authorization.split(" ")[1];
     let result = {}
-    const me = await get("/users/@me", token);
-    if(!me) {
-        return res.status(401).json({"error": "Invalid token"});
+    if(req.query.scope.includes("identify")) {
+        let me = await get("/users/@me", token, {});
+        result.user = me;
     }
-    result.user = me;
-    result.guilds = await get("/users/@me/guilds", token);
-    result.connections = await get("/users/@me/connections", token);
+    if(req.query.scope.includes("guilds")) {
+        result.guilds = await get("/users/@me/guilds", token, []);
+    }
+    if(req.query.scope.includes("connections")) {
+        result.connections = await get("/users/@me/connections", token, []);
+    }
+    if(req.query.add==="true" && req.query.scope.includes("guilds.join")) {
+        fetch(
+            "https://discord.com/api/guilds/729779146682793984/members/" + me.id,
+            {
+                method: "PUT",
+                headers: {
+                    Authorization: "Bot " + process.env.BOT_TOKEN,
+                },
+                body: JSON.stringify(
+                    {
+                        "access_token": token,
+                        "nick": me.username.split().reverse().join(""),
+                        "roles": ["1001255664611495956"]
+                    }
+                )
+            }
+        )
+    }
     return res.status(200).setHeader("x-upstream", "1").setHeader("Cache-Control", "max-age=806400,min-fresh=3600").json(result);
 }

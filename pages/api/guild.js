@@ -19,6 +19,7 @@ export default async function guild(req, res) {
     res.setHeader("x-upstream", "1").setHeader("Cache-Control", "max-age=806400,min-fresh=3600")
     let data = await response.json();
     if(response.status===200) {
+        data.full = true
         res.json(data)
     }
     else {

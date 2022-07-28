@@ -2,6 +2,7 @@ import { Component } from "react";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { useState } from "react";
+import _def from "../public/default.png";
 const host = "https://test-dashboard-three-monkey.vercel.app/"
 const redirect_uri = `https://discord.com/api/oauth2/authorize?client_id=729335748670783488&redirect_uri=${host}&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none`
 
@@ -56,9 +57,17 @@ function Role(props) {
 
 
 function Guild(props) {
-  let [hidden, setHidden] = useState(false);
+  let [hidden, setHidden] = useState(true);
   let data = props.data;
   const url = data.icon === null ? `https://cdn.discordapp.com/embed/avatars/${data.id % 5}.png` : `https://cdn.discordapp.com/icons/${data.id}/${data.icon}.webp`;
+  const _this = props._this
+  const onLoad = () => {
+    console.log("loaded", data.id);
+    if(data.full===true) {
+      return;
+    }
+    _this.resolveGuild(data.id).then((full_data) => data = full_data);
+  }
   if(hidden) {
     return (
       <div className={styles.guildCard} onClick={() => {setHidden(!hidden)}}>
@@ -66,7 +75,7 @@ function Guild(props) {
           <h3>{data.name} ({data.id})</h3>
         </div>
         <div>
-          <Image src={url+"?size=64"} alt="icon" width={64} height={64}/>
+          <Image src={url+"?size=64"} alt="icon" width={64} height={64} onLoadingComplete={()=>{onLoad()}}/>
         </div>
       </div>
     )
@@ -113,7 +122,7 @@ function Guild(props) {
       </div>
       <div>
         <div style={{height: "128px", width: "128px"}}>
-          <Image src={url+"?size=128"} alt="icon" width={128} height={128}/>
+          <Image src={url+"?size=128"} alt="icon" width={128} height={128} onLoadingComplete={onLoad}/>
         </div>
       </div>
     </div>
@@ -170,24 +179,6 @@ export default class Index extends Component {
       ip: null,
       access_token: null,
       scope: null,
-      user: {
-        id: null,
-        username: null,
-        discriminator: null,
-        avatar: null,
-        bot: false,
-        system: false,
-        mfa_enabled: false,
-        banner: null,
-        accent_color: null,
-        locale: "en",
-        verified: false,
-        email: null,
-        flags: null,
-        premium_type: null
-      },
-      guilds: [],
-      connections: [],
       hide_warning: false,
       on_mobile: false,
     }
@@ -220,7 +211,7 @@ export default class Index extends Component {
         this.getIp().then(() => {console.log("getIP")});
       }
       const res = await fetch(
-        "/api/data", 
+        "/api/data?scope=" + params.scope, 
         {
           method: "GET",
           withCredentials: true, 
@@ -232,13 +223,36 @@ export default class Index extends Component {
       )
       const newData = await res.json();
       console.log(newData)
-      this.setState(newData, this.resolveGuilds);
+      this.setState(newData);
     }
     this.setState({
       access_token: params.access_token,
       scope: params.scope,
       on_mobile: window.screen.availWidth <= 480
     }, callback);
+  }
+
+  async resolveGuild(guild, _default) {
+    while(1) {
+      let response = await fetch(
+        "/api/guild?id=" + guild,
+        {
+          headers: {
+            "Authorization": "Bearer " + this.state.access_token,
+          }
+        }
+      )
+      if(response.status === 429) {
+        await new Promise(resolve => setTimeout(resolve, response.headers.get("Retry-After")));
+        continue;
+      }
+      else if (!response.ok || response.status != 200) {
+        return _default;
+      }
+      else {
+        return await response.json();
+      }
+    }
   }
 
   async resolveGuilds() {
@@ -249,30 +263,13 @@ export default class Index extends Component {
       }
       else {
         let id = _data.id;
-        let data = null;
-        while(1) {
-          let response = await fetch(
-            "/api/guild?id=" + id,
-            {
-              headers: {
-                "Authorization": "Bearer " + this.state.access_token,
-              }
-            }
-          )
-          if(response.status === 429) {
-            await new Promise(resolve => setTimeout(resolve, response.headers.get("Retry-After")));
-            continue;
-          }
-          else if (!response.ok || response.status != 200) {
-            newData.push(_data);
-            break;
-          }
-          else {
-            data = await response.json();
-            Object.assign(data, _data);
-            newData.push(data)
-            break;
-          }
+        let data = await this.resolveGuild(id, null);
+        if(!data) {
+          newData.push(_data)
+        }
+        else {
+          Object.assign(data, _data);
+          newData.push(data);
         }
       }
     }
@@ -280,13 +277,13 @@ export default class Index extends Component {
   }
 
   render() {
-    if(this.state.user.id!==null) {
+    if(this.state.user!==undefined) {
       return (
         <main>
           <div hidden={this.state.hide_warning} onClick={()=>{this.setState({hide_warning: true})}} style={{border: "12px", width: "100%", padding: "1rem", border: "3px soldi red", background: "rgb(255,100,100,0.5)"}}>
             <p>
               Hey {this.state.user.username} - this is all data we grabbed with a simple redirect to discord.
-              One thing you may have noticed was that you didn&#39;t even have to do anything!
+              One thing you may have noticed was that you didn&#39;t even have to do anything (unless you had to log in)!
               There were no buttons to press.
               <br/>
               <h3>What? Why are you showing me this?</h3>
@@ -312,7 +309,7 @@ export default class Index extends Component {
           <h1>Welcome {this.state.user.username || 'deleted-user'}#{this.state.user.discriminator || '0000'}!</h1>
           <div>Your IP is {this.state.ip}</div>
           <User data={this.state.user}/>
-          {this.state.guilds.map((data, index) => <Guild data={data} key={index}/>)}
+          {this.state.guilds.map((data, index) => <Guild data={data} key={index} _this={this}/>)}
         </main>
       )
     }
