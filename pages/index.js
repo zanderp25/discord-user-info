@@ -3,8 +3,8 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { useState } from "react";
 import _def from "../public/default.png";
-const host = "https://test-dashboard-three-monkey.vercel.app/"
-const redirect_uri = `https://discord.com/api/oauth2/authorize?client_id=729335748670783488&redirect_uri=${host}&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none`
+const host = "https://userinfo.zanderp25.com/"
+const redirect_uri = `https://discord.com/api/oauth2/authorize?client_id=1007644265045827615&redirect_uri=${encodeURIComponent(host)}&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none`
 
 
 function Emoji(props) {
@@ -280,7 +280,7 @@ export default class Index extends Component {
     if(this.state.user!==undefined) {
       return (
         <main>
-          <div hidden={this.state.hide_warning} onClick={()=>{this.setState({hide_warning: true})}} style={{border: "12px", width: "100%", padding: "1rem", border: "3px soldi red", background: "rgb(255,100,100,0.5)"}}>
+          {/* <div hidden={this.state.hide_warning} onClick={()=>{this.setState({hide_warning: true})}} style={{border: "12px", width: "100%", padding: "1rem", border: "3px soldi red", background: "rgb(255,100,100,0.5)"}}>
             <div>
               Hey {this.state.user.username} - this is all data we grabbed with a simple redirect to discord.
               One thing you may have noticed was that you didn&#39;t even have to do anything (unless you had to log in or you hadn&#39;t authorised before)!
@@ -305,7 +305,7 @@ export default class Index extends Component {
                 <a href="//github.com/EEKIM10/puller" target="_blank" rel="noreferrer">github.com</a>
               </i>
             </div>
-          </div>
+          </div> */}
           <button onClick={() => {console.debug(JSON.stringify(this.state, null, 4))}} hidden={this.state.on_mobile}>
             print snatched data (as JSON) to console
           </button>
