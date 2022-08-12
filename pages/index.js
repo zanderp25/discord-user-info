@@ -1,8 +1,9 @@
-import { Component } from "react";
+import { Component, Fragment } from "react";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import { useState } from "react";
 import _def from "../public/default.png";
+import { Tab } from '@headlessui/react';
 const host = "https://userinfo.zanderp25.com/"
 const redirect_uri = `https://discord.com/api/oauth2/authorize?client_id=1007644265045827615&redirect_uri=${encodeURIComponent(host)}&response_type=token&scope=identify%20email%20connections%20guilds%20guilds.join&prompt=none`
 
@@ -171,6 +172,31 @@ function User(props) {
   )
 }
 
+function GuildPage(props) {
+  const [state, setState] = useState(props.state);
+  return (
+    <main>
+      <div className={styles.info}>
+        <h1>You are in {state.guilds.length}{state.guilds.length == 69 ? " (Nice)" : ""} servers.</h1>
+      </div>
+      {state.guilds.map((data, index) => <Guild data={data} key={index} _this={this}/>)}
+    </main>
+  )
+}
+
+function UserPage(props) {
+  const [state, setState] = useState(props.state);
+  return (
+    <main>
+      <div className={styles.info}>
+        <h1>
+          Welcome, {state.user.username || 'deleted-user'}#{state.user.discriminator || '0000'}!
+        </h1>
+      </div>
+      <User data={state.user}/>
+    </main>
+  )
+}
 
 export default class Index extends Component {
   constructor(props) {
@@ -280,39 +306,50 @@ export default class Index extends Component {
     if(this.state.user!==undefined) {
       return (
         <main>
-          {/* <div hidden={this.state.hide_warning} onClick={()=>{this.setState({hide_warning: true})}} style={{border: "12px", width: "100%", padding: "1rem", border: "3px soldi red", background: "rgb(255,100,100,0.5)"}}>
-            <div>
-              Hey {this.state.user.username} - this is all data we grabbed with a simple redirect to discord.
-              One thing you may have noticed was that you didn&#39;t even have to do anything (unless you had to log in or you hadn&#39;t authorised before)!
-              There were no buttons to press.
-              <br/>
-              <h3>What? Why are you showing me this?</h3>
-              If you are on this page, you were brought here because you clicked on a random link you found in discord.
-              As you can see, if you&#39;re logged into a browser, a malicious website could easily redirect you to an authorisation page
-              and then back to their home page.
-              From there, they could grab all of the data we did below, and they could make a fingerprint, or use some data for
-              blackmail, etc etc.
-              <br/>
-              <h3>Okay, so what can I do?</h3>
-              <strong>Stop clicking random links!</strong>
-              If you&#39;re friends with me (eek#7574) I&#39;m sure you only clicked this link because you trust me. If you clicked this link
-              because you were sent it, well done, you just got fingerprinted!
-              <br/>
-              <hr/>
-              <br/>
-              <i>You can click anywhere on this box to delete it. You can also click on any card below to expand or collapse it.</i>
-              <i>No data you see here is stored. You can see the source code for this website at:
-                <a href="//github.com/EEKIM10/puller" target="_blank" rel="noreferrer">github.com</a>
-              </i>
-            </div>
-          </div> */}
-          <button onClick={() => {console.debug(JSON.stringify(this.state, null, 4))}} hidden={this.state.on_mobile}>
+        <Tab.Group>
+          <div className={styles.tabBar}>
+            <Tab.List>
+              <Tab  as={Fragment}>
+                {({ selected }) => (
+                  <button className={selected ? styles.tabSelected : styles.tabUnselected}>
+                    User
+                  </button>
+                )}
+              </Tab>
+              <Tab  as={Fragment}>
+                {({ selected }) => (
+                  <button className={selected ? styles.tabSelected : styles.tabUnselected}>
+                    Servers
+                  </button>
+                )}
+              </Tab>
+              <Tab  as={Fragment}>
+                {({ selected }) => (
+                  <button className={selected ? styles.tabSelected : styles.tabUnselected}>
+                    Friends
+                  </button>
+                )}
+              </Tab>
+            </Tab.List>
+            <span>Logged in as <b>{this.state.user.username || 'deleted-user'}#{this.state.user.discriminator || '0000'}</b></span>
+          </div>
+          <Tab.Panels>
+            <Tab.Panel>
+              <UserPage state={this.state}/>
+            </Tab.Panel>
+            <Tab.Panel>
+              {/* header with guild count */}
+              <div className={styles.info}>
+                <h1>You are in {this.state.guilds.length}{this.state.guilds.length == 69 ? " (Nice)" : ""} servers.</h1>
+              </div>
+              {this.state.guilds.map((data, index) => <Guild data={data} key={index} _this={this}/>)}
+            </Tab.Panel>
+            <Tab.Panel><div className={styles.info}>u have no friends :c</div></Tab.Panel>
+          </Tab.Panels>
+        </Tab.Group>
+          {/* <button onClick={() => {console.debug(JSON.stringify(this.state, null, 4))}} hidden={this.state.on_mobile}>
             print snatched data (as JSON) to console
-          </button>
-          <h1>Welcome {this.state.user.username || 'deleted-user'}#{this.state.user.discriminator || '0000'}!</h1>
-          <div>Your IP is {this.state.ip}</div>
-          <User data={this.state.user}/>
-          {this.state.guilds.map((data, index) => <Guild data={data} key={index} _this={this}/>)}
+          </button> */}
         </main>
       )
     }
