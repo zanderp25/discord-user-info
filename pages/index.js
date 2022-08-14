@@ -63,7 +63,7 @@ function Guild(props) {
   const url = data.icon === null ? `https://cdn.discordapp.com/embed/avatars/${data.id % 5}.png` : `https://cdn.discordapp.com/icons/${data.id}/${data.icon}.webp`;
   const _this = props._this
   const onLoad = () => {
-    console.log("loaded", data.id);
+    console.log("loaded image", data.id);
     if(data.full===true) {
       return;
     }
@@ -73,7 +73,8 @@ function Guild(props) {
     return (
       <div className={styles.guildCard} onClick={() => {setHidden(!hidden)}}>
         <div>
-          <h3>{data.name} ({data.id})</h3>
+          <h1>{data.name}</h1>
+          <p>{data.id}</p>
         </div>
         <div>
           <Image src={url+"?size=64"} alt="icon" width={64} height={64} onLoadingComplete={()=>{onLoad()}}/>
@@ -84,7 +85,8 @@ function Guild(props) {
   return (
     <div className={styles.guildCard} onClick={() => {setHidden(!hidden)}}>
       <div>
-        <h3>{data.name} ({data.id})</h3>
+        <h1>{data.name}</h1>
+        <p>{data.id}</p>
         <ul>
         <li>Name: {data.name}</li>
           <li>ID: <code>{data.id}</code></li>
@@ -131,61 +133,65 @@ function Guild(props) {
 }
 
 function User(props) {
-  let [hidden, setHidden] = useState(false);
   const data = props.data;
   const url = data.icon === null ? `https://cdn.discordapp.com/embed/avatars/${data.id % 5}.png` : `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.webp`;
+  const bannerUrl = data.banner === null ?
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" : // Transparent pixel
+    `https://cdn.discordapp.com/banners/${data.id}/${data.banner}.png`;
 
-  if(hidden) {
-    return (
-      <div className={styles.userCard} onClick={()=>{setHidden(!hidden)}}>
-        <div><h3>{data.username}#{data.discriminator} ({data.id})</h3></div>
-        <div><Image src={url} alt="icon" width={64} height={64}/></div>
-      </div>
-    )
+  function flag_parser() {
+    const flags = data.flags
+    let ret = [];
+    if(flags & 1<<0) ret.push("Discord Employee");
+    if(flags & 1<<1) ret.push("Partnered Server Owner");
+    if(flags & 1<<2) ret.push("Hypesquad Events");
+    if(flags & 1<<3) ret.push("Bug Hunter Level 1");
+    if(flags & 1<<6) ret.push("Hypesquad Bravery");
+    if(flags & 1<<7) ret.push("Hypesquad Brilliance");
+    if(flags & 1<<8) ret.push("Hypesquad Balance");
+    if(flags & 1<<9) ret.push("Early Supporter");
+    if(flags & 1<<12) ret.push("System User");
+    if(flags & 1<<13) ret.push("Bug Hunter Level 2");
+    if(flags & 1<<14) ret.push("Verified Bot");
+    if(flags & 1<<16) ret.push("Verified Bot Developer");
+    if(flags & 1<<18) ret.push("Discord Certified Moderator");
+    if(flags & 1<<19) ret.push("Bot HTTP Interactions Only");
+    if(data.premium_type != 0) ret.push("Nitro User");
+    return ret;
   }
 
+
   return (
-    <div className={styles.userCard} onClick={()=>{setHidden(!hidden)}}>
+    <div className={styles.userCard}>
       <div>
-        <h3>{data.username}#{data.discriminator} ({data.id})</h3>
-        <ul>
-          <li>ID: <code>{data.id}</code></li>
-          <li>Username: {data.username}</li>
-          <li>Discriminator: {data.discriminator}</li>
-          <li>Avatar hash: {data.avatar || "No custom avatar"}</li>
-          <li>Avatar decoration: {data.avatar_decoration || "No custom decoration"}</li>
-          <li>Banner hash: {data.banner || "No custom banner"}</li>
-          <li>Banner colour: <span style={{color: data.banner_color}}>{data.banner_color}</span></li>
-          <li>Public flags: {data.public_flags}</li>
-          <li>Flags: {data.flags} (These are usually the same as public flags)</li>
-          <li>Locale: {data.locale}</li>
-          <li>Email: {data.email}</li>
-          <li>Email verified: {data.verified ? 'Yes' : 'No'}</li>
-          <li>2fa enabled: {data.mfa_enabled ? 'Yes' : 'No'}</li>
-        </ul>
-        <p><code>{JSON.stringify(data, null, 2)}</code></p>
-      </div>
-      <div>
-        <Image src={url} alt="icon" width={64} height={64}/>
+        <img src={bannerUrl} alt="banner" className={false? styles.bannerImage: styles.noBannerImage} style={{background: data.banner_color}}/>
+        <img src={url} alt="icon" className={styles.iconImage}/>
+        <div className={styles.info}>
+          <h1>{data.username}#{data.discriminator}</h1>
+          <p>{data.id}</p>
+          <ul>
+            {/* <li>ID: <code>{data.id}</code></li>
+            <li>Username: {data.username}</li>
+            <li>Discriminator: {data.discriminator}</li> */}
+            <li>Flags: {flag_parser().join(", ")}</li>
+            <li>Nitro type: {data.premium_type == 0? "None": data.premium_type == 1? "Nitro Classic": "Nitro"}</li>
+            <li>Banner colour: <span style={{color: data.banner_color}}>{data.banner_color}</span></li>
+            <li>Email: {data.email} {data.verified ? '(Verified)' : '(Not verified)'}</li>
+            <li>Two-factor authentication enabled: {data.mfa_enabled ? 'Yes' : 'No'}</li>
+            <li>Locale: {data.locale}</li>
+            <li>Avatar hash: {data.avatar || "No custom avatar"}</li>
+            <li>Avatar decoration: {data.avatar_decoration || "No custom decoration"}</li>
+            <li>Banner hash: {data.banner || "No custom banner"}</li>
+          </ul>
+          <p><code>{JSON.stringify(data, null, 2)}</code></p>
+        </div>
       </div>
     </div>
   )
 }
 
-function GuildPage(props) {
-  const [state, setState] = useState(props.state);
-  return (
-    <main>
-      <div className={styles.info}>
-        <h1>You are in {state.guilds.length}{state.guilds.length == 69 ? " (Nice)" : ""} servers.</h1>
-      </div>
-      {state.guilds.map((data, index) => <Guild data={data} key={index} _this={this}/>)}
-    </main>
-  )
-}
-
 function UserPage(props) {
-  const [state, setState] = useState(props.state);
+  const state = props.state;
   return (
     <main>
       <div className={styles.info}>
@@ -338,7 +344,6 @@ export default class Index extends Component {
               <UserPage state={this.state}/>
             </Tab.Panel>
             <Tab.Panel>
-              {/* header with guild count */}
               <div className={styles.info}>
                 <h1>You are in {this.state.guilds.length}{this.state.guilds.length == 69 ? " (Nice)" : ""} servers.</h1>
               </div>
