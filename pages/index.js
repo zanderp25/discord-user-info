@@ -139,6 +139,8 @@ function User(props) {
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" : // Transparent pixel
     `https://cdn.discordapp.com/banners/${data.id}/${data.banner}.png`;
 
+  let [showEmail, setShowEmail] = useState(false);
+
   function flag_parser() {
     const flags = data.flags
     let ret = [];
@@ -176,7 +178,7 @@ function User(props) {
             <li>Flags: {flag_parser().join(", ")}</li>
             <li>Nitro type: {data.premium_type == 0? "None": data.premium_type == 1? "Nitro Classic": "Nitro"}</li>
             <li>Banner colour: <span style={{color: data.banner_color}}>{data.banner_color}</span></li>
-            <li>Email: {data.email} {data.verified ? '(Verified)' : '(Not verified)'}</li>
+            <li onClick={() => setShowEmail(!showEmail)}>Email: {showEmail? data.email: "[click here to show email]"} {data.verified ? '(Verified)' : '(Not verified)'}</li>
             <li>Two-factor authentication enabled: {data.mfa_enabled ? 'Yes' : 'No'}</li>
             <li>Locale: {data.locale}</li>
             <li>Avatar hash: {data.avatar || "No custom avatar"}</li>
